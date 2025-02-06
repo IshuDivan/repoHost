@@ -9,7 +9,7 @@
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(to right, #4a90e2, #50b3a2);
-            color: #ffffff; /* Set default text color to white */
+            color: #ffffff;
             padding: 20px;
             margin: 0;
             display: flex;
@@ -21,13 +21,13 @@
             color: #ffffff;
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            font-size: 2.5em; /* Increased font size */
+            font-size: 2.5em;
         }
         #output {
             margin-bottom: 20px;
             text-align: center;
             font-family: 'Space Mono', monospace;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
         }
         .loading-bar {
             background-color: #ccc;
@@ -44,11 +44,11 @@
         }
         .error {
             color: #ff4d4d;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
         }
         .success {
             color: #28a745;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
         }
         table {
             width: 100%;
@@ -60,7 +60,7 @@
             overflow: hidden;
         }
         th, td {
-            padding: 15px; /* Increased padding */
+            padding: 15px;
             text-align: center;
             border: 1px solid #ddd;
         }
@@ -68,22 +68,22 @@
             background-color: #007bff;
             color: white;
             font-weight: bold;
-            font-size: 1.5em; /* Increased font size */
+            font-size: 1.5em;
         }
         td {
-            font-size: 1.2em; /* Increased font size */
-            color: #333; /* Dark text for better contrast */
+            font-size: 1.2em;
+            color: #333;
         }
         .stream-time {
             color: #28a745;
-            font-weight: bold; /* Make stream times bold */
+            font-weight: bold;
         }
         @media (max-width: 600px) {
             h1 {
-                font-size: 2em; /* Adjusted for smaller screens */
+                font-size: 2em;
             }
             td {
-                font-size: 1em; /* Adjusted for smaller screens */
+                font-size: 1em;
             }
         }
     </style>
@@ -92,18 +92,21 @@
 
 <h1>Stream Schedule</h1>
 <div id="output"></div>
+<div class="loading-bar">
+    <div class="filled"></div>
+</div>
 
 <script>
     const streamDays = {
         "Monday": [],
         "Tuesday": ["20:00"],
         "Wednesday": ["20:00"],
-        "Thursday": [],
+        "Thursday": ["20:00"],
         "Friday": ["20:00"],
         "Saturday": ["20:00"],
         "Sunday": []
     };
-    const lastStreamLength = 4.5; // Duration of an average stream in hours
+    const lastStreamLength = 4.5;
 
     function getLastStream(day, streamTime) {
         const now = new Date();
@@ -131,18 +134,20 @@
 
     function calculateTimePassed(lastTime) {
         const now = new Date();
-        return (now - lastTime) / (1000 * 60 * 60); // Convert to hours
+        return (now - lastTime) / (1000 * 60 * 60);
     }
 
     function calculateTimeUntil(nextTime) {
         const now = new Date();
-        return (nextTime - now) / (1000 * 60 * 60); // Convert to hours
+        return (nextTime - now) / (1000 * 60 * 60);
     }
 
     function displayLoadingBar(done, total) {
-        const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
         const bar = document.querySelector('.filled');
-        bar.style.width = percentage + '%';
+        if (bar) {
+            const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
+            bar.style.width = percentage + '%';
+        }
     }
 
     function getWeekdayNumber(weekdayName) {
@@ -191,7 +196,6 @@
             }
         }
 
-        // Always show output, regardless of streaming status
         if (lastStream) {
             const now = new Date();
             if (lastStream <= now && now <= new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000)) {
@@ -241,10 +245,6 @@
 
     main();
 </script>
-
-<div class="loading-bar">
-    <div class="filled"></div>
-</div>
 
 </body>
 </html>
