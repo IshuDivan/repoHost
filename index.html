@@ -1,453 +1,309 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Stream Schedule</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
-
-<style>
-
-body {
-
-font-family: 'Roboto', sans-serif;
-
-background: linear-gradient(to right, #4a90e2, #50b3a2);
-
-color: #ffffff;
-
-padding: 20px;
-
-margin: 0;
-
-display: flex;
-
-flex-direction: column;
-
-align-items: center;
-
-min-height: 100vh;
-
-}
-
-h1 {
-
-color: #ffffff;
-
-margin-bottom: 20px;
-
-text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-
-font-size: 2.5em;
-
-}
-
-#output {
-
-margin-bottom: 20px;
-
-text-align: center;
-
-font-family: 'Space Mono', monospace;
-
-font-size: 1.2em;
-
-}
-
-.loading-bar {
-
-background-color: #ccc;
-
-border-radius: 5px;
-
-overflow: hidden;
-
-height: 20px;
-
-width: 100%;
-
-margin-top: 10px;
-
-}
-
-.filled {
-
-background-color: #007bff;
-
-height: 100%;
-
-transition: width 0.3s;
-
-}
-
-.error {
-
-color: #ff4d4d;
-
-font-size: 1.2em;
-
-}
-
-.success {
-
-color: #28a745;
-
-font-size: 1.2em;
-
-}
-
-table {
-
-width: 100%;
-
-border-collapse: collapse;
-
-margin: 20px 0;
-
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-
-background-color: #ffffff;
-
-border-radius: 8px;
-
-overflow: hidden;
-
-}
-
-th, td {
-
-padding: 15px;
-
-text-align: center;
-
-border: 1px solid #ddd;
-
-}
-
-th {
-
-background-color: #007bff;
-
-color: white;
-
-font-weight: bold;
-
-font-size: 1.5em;
-
-}
-
-td {
-
-font-size: 1.2em;
-
-color: #333;
-
-}
-
-.stream-time {
-
-color: #28a745;
-
-font-weight: bold;
-
-}
-
-@media (max-width: 600px) {
-
-h1 {
-
-font-size: 2em;
-
-}
-
-td {
-
-font-size: 1em;
-
-}
-
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Schedule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #2c3e50, #34495e); /* Darker background */
+            color: #ecf0f1; /* Lighter text color */
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #ecf0f1; /* Maintain contrast */
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-size: 2.5em;
+        }
+        #output {
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2em;
+        }
+        .loading-bar {
+            background-color: #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .filled {
+            background-color: #007bff; /* Keep the loading bar color */
+            height: 100%;
+            transition: width 0.3s;
+        }
+        .error {
+            color: #ff4d4d; /* Error color remains the same */
+            font-size: 1.2em;
+        }
+        .success {
+            color: #28a745; /* Success color remains the same */
+            font-size: 1.2em;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            width: 100%;
+        }
+        .day {
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            font-size: 1.2em;
+            background-color: #ffffff; /* Unified background for all days */
+            color: #000000; /* Text color set to black */
+        }
+        .day-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            color: #ffffff; /* Text color for day headers */
+        }
+        /* Day Header Colors */
+        .has-streams .day-name { background-color: #ff0000; } /* Days with streams (red) */
+        .no-streams .day-name { background-color: #ffffff; } /* Days without streams (white) */
+        .current-day .day-name { background-color: #0000ff; } /* Current day (blue) */
+        .past-day .day-name { background-color: #aaaaaa; color: #444444; } /* Past days (grey) */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #ffffff; /* Table background remains white */
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff; /* Keep header color */
+            color: #ffffff; /* Header text remains white */
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+        td {
+            font-size: 1.2em;
+            color: #333; /* Table data text remains dark */
+        }
+        .stream-time {
+            color: #28a745; /* Stream time color remains the same */
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+            td {
+                font-size: 1em;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<h1>Stream Schedule</h1>
-
-<div id="output"></div>
-
-<div class="loading-bar">
-
-<div class="filled"></div>
-
-</div>
-
-<script>
-
-const streamDays = {
-
-"Monday": [],
-
-"Tuesday": ["20:00"],
-
-"Wednesday": ["20:00"],
-
-"Thursday": [],
-
-"Friday": ["20:00"],
-
-"Saturday": ["20:00"],
-
-"Sunday": []
-
-};
-
-const lastStreamLength = 4.5;
-
-function getLastStream(day, streamTime) {
-
-const now = new Date();
-
-const daysBehind = (now.getDay() - day + 7) % 7;
-
-const lastStreamThisWeek = new Date(now);
-
-lastStreamThisWeek.setDate(now.getDate() - daysBehind);
-
-const [hour, minute] = streamTime.split(':').map(Number);
-
-lastStreamThisWeek.setHours(hour, minute, 0, 0);
-
-const lastStreamPreviousWeek = new Date(lastStreamThisWeek);
-
-lastStreamPreviousWeek.setDate(lastStreamPreviousWeek.getDate() - 7);
-
-return [lastStreamThisWeek, lastStreamPreviousWeek];
-
-}
-
-function getNextStream(day, streamTime) {
-
-const now = new Date();
-
-const daysAhead = (day - now.getDay() + 7) % 7;
-
-const nextStream = new Date(now);
-
-nextStream.setDate(now.getDate() + daysAhead);
-
-const [hour, minute] = streamTime.split(':').map(Number);
-
-nextStream.setHours(hour, minute, 0, 0);
-
-return nextStream;
-
-}
-
-function calculateTimePassed(lastTime) {
-
-const now = new Date();
-
-return (now - lastTime) / (1000 * 60 * 60);
-
-}
-
-function calculateTimeUntil(nextTime) {
-
-const now = new Date();
-
-return (nextTime - now) / (1000 * 60 * 60);
-
-}
-
-function displayLoadingBar(done, total) {
-
-const bar = document.querySelector('.filled');
-
-if (bar) {
-
-const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
-
-bar.style.width = percentage + '%';
-
-}
-
-}
-
-function getWeekdayNumber(weekdayName) {
-
-const weekdays = {
-
-"Sunday": 0,
-
-"Monday": 1,
-
-"Tuesday": 2,
-
-"Wednesday": 3,
-
-"Thursday": 4,
-
-"Friday": 5,
-
-"Saturday": 6
-
-};
-
-return weekdays[weekdayName];
-
-}
-
-function main() {
-
-const output = document.getElementById('output');
-
-let lastStreams = [];
-
-let nextStream = null;
-
-for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
-
-for (const streamTime of streamTimeList) {
-
-const dayNumber = getWeekdayNumber(dayName);
-
-const [lastThisWeek, lastPreviousWeek] = getLastStream(dayNumber, streamTime);
-
-if (lastThisWeek < new Date()) {
-
-lastStreams.push(lastThisWeek);
-
-}
-
-if (lastPreviousWeek < new Date()) {
-
-lastStreams.push(lastPreviousWeek);
-
-}
-
-}
-
-}
-
-const lastStream = lastStreams.length ? new Date(Math.max(...lastStreams)) : null;
-
-for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
-
-for (const streamTime of streamTimeList) {
-
-const dayNumber = getWeekdayNumber(dayName);
-
-const nextStreamTemp = getNextStream(dayNumber, streamTime);
-
-if (nextStreamTemp > new Date()) {
-
-if (!nextStream || nextStreamTemp < nextStream) {
-
-nextStream = nextStreamTemp;
-
-}
-
-}
-
-}
-
-}
-
-if (lastStream) {
-
-const now = new Date();
-
-if (lastStream <= now && now <= new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000)) {
-
-const timeSinceLastStream = calculateTimePassed(lastStream);
-
-output.innerHTML = `<p class="success">(Probably) Currently streaming! Time since started: ${timeSinceLastStream.toFixed(2)} hours</p>`;
-
-} else {
-
-const lastStreamWaiting = new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000);
-
-const done = calculateTimePassed(lastStreamWaiting);
-
-const toBeDone = calculateTimeUntil(nextStream);
-
-const total = done + toBeDone;
-
-output.innerHTML = `
-
-<p>Time passed since last Stream: ${done.toFixed(2)} hours</p>
-
-<p>Time until next Stream: ${toBeDone.toFixed(2)} hours</p>
-
-<p>Total wait time: ${total.toFixed(2)} hours</p>
-
-<p>Next Stream is on ${nextStream.toLocaleString('en-US', { weekday: 'long' })} at ${nextStream.getHours()}:${nextStream.getMinutes().toString().padStart(2, '0')}</p>
-
-`;
-
-displayLoadingBar(done, total);
-
-}
-
-} else {
-
-output.innerHTML = `<p class="error">No previous streams found.</p>`;
-
-}
-
-// Always display the timetable
-
-displayWeekTimetable();
-
-}
-
-function displayWeekTimetable() {
-
-const timetableHTML = `
-
-<table>
-
-<tr>
-
-<th>Day</th>
-
-<th>Stream Times</th>
-
-</tr>
-
-${Object.entries(streamDays).map(([day, times]) => `
-
-<tr>
-
-<td>${day}</td>
-
-<td>${times.length > 0 ? times.map(time => `<span class="stream-time">${time}</span>`).join(', ') : 'No streams'}</td>
-
-</tr>
-
-`).join('')}
-
-</table>
-
-`;
-
-document.body.insertAdjacentHTML('beforeend', timetableHTML);
-
-}
-
-main();
-
-</script>
-
+    <h1>Stream Schedule</h1>
+    <div id="output"></div>
+    <div class="loading-bar">
+        <div class="filled"></div>
+    </div>
+
+    <script>
+        const streamDays = {
+            "Monday": [],
+            "Tuesday": ["20:00"],
+            "Wednesday": ["20:00"],
+            "Thursday": ["20:00"],
+            "Friday": ["20:00"],
+            "Saturday": ["20:00"],
+            "Sunday": []
+        };
+        const lastStreamLength = 4.5; // Duration of the last stream in hours
+        const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]; // Changed order
+
+        function getLastStream(day, streamTime) {
+            const now = new Date();
+            const daysBehind = (now.getDay() + 6 - day) % 7; // Adjusted calculation
+            const lastStreamThisWeek = new Date(now);
+            lastStreamThisWeek.setDate(now.getDate() - daysBehind);
+            const [hour, minute] = streamTime.split(':').map(Number);
+            lastStreamThisWeek.setHours(hour, minute, 0, 0);
+            const lastStreamPreviousWeek = new Date(lastStreamThisWeek);
+            lastStreamPreviousWeek.setDate(lastStreamPreviousWeek.getDate() - 7);
+            return [lastStreamThisWeek, lastStreamPreviousWeek];
+        }
+
+        function getNextStream(day, streamTime) {
+            const now = new Date();
+            const daysAhead = (day - (now.getDay() + 6) % 7 + 7) % 7; // Adjusted calculation
+            const nextStream = new Date(now);
+            nextStream.setDate(now.getDate() + daysAhead);
+            const [hour, minute] = streamTime.split(':').map(Number);
+            nextStream.setHours(hour, minute, 0);
+            return nextStream;
+        }
+
+        function calculateTimePassed(lastTime) {
+            const now = new Date();
+            return (now - lastTime) / (1000 * 60 * 60);
+        }
+
+        function calculateTimeUntil(nextTime) {
+            const now = new Date();
+            return (nextTime - now) / (1000 * 60 * 60);
+        }
+
+        function displayLoadingBar(done, total) {
+            const bar = document.querySelector('.filled');
+            if (bar) {
+                const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
+                bar.style.width = percentage + '%';
+            }
+        }
+
+        function getWeekdayNumber(weekdayName) {
+            const weekdays = {
+                "Monday": 1,
+                "Tuesday": 2,
+                "Wednesday": 3,
+                "Thursday": 4,
+                "Friday": 5,
+                "Saturday": 6,
+                "Sunday": 0 // Sunday is now 0
+            };
+            return weekdays[weekdayName];
+        }
+
+        function main() {
+            const output = document.getElementById('output');
+            let lastStreams = [];
+            let nextStream = null;
+
+            // Calculate last streams
+            for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
+                for (const streamTime of streamTimeList) {
+                    const dayNumber = getWeekdayNumber(dayName);
+                    const [lastThisWeek, lastPreviousWeek] = getLastStream(dayNumber, streamTime);
+                    if (lastThisWeek < new Date()) lastStreams.push(lastThisWeek);
+                    if (lastPreviousWeek < new Date()) lastStreams.push(lastPreviousWeek);
+                }
+            }
+
+            const lastStream = lastStreams.length ? new Date(Math.max(...lastStreams)) : null;
+
+            // Calculate next stream
+            for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
+                for (const streamTime of streamTimeList) {
+                    const dayNumber = getWeekdayNumber(dayName);
+                    const nextStreamTemp = getNextStream(dayNumber, streamTime);
+                    if (nextStreamTemp > new Date()) {
+                        if (!nextStream || nextStreamTemp < nextStream) {
+                            nextStream = nextStreamTemp;
+                        }
+                    }
+                }
+            }
+
+            // Update output and loading bar
+            if (lastStream) {
+                const now = new Date();
+                if (lastStream <= now && now <= new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000)) {
+                    const timeSinceLastStream = calculateTimePassed(lastStream);
+                    output.innerHTML = `<p class="success">(Probably) Currently streaming! Time since started: ${timeSinceLastStream.toFixed(2)} hours</p>`;
+                } else {
+                    const lastStreamWaiting = new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000);
+                    const done = calculateTimePassed(lastStreamWaiting);
+                    const toBeDone = calculateTimeUntil(nextStream);
+                    const total = done + toBeDone;
+
+                    output.innerHTML = `
+                        <p>Time passed since last Stream: ${done.toFixed(2)} hours</p>
+                        <p>Time until next Stream: ${toBeDone.toFixed(2)} hours</p>
+                        <p>Total wait time: ${total.toFixed(2)} hours</p>
+                        <p>Next Stream is on ${nextStream.toLocaleString('en-US', { weekday: 'long' })} at ${nextStream.getHours()}:${nextStream.getMinutes().toString().padStart(2, '0')}</p>
+                    `;
+                    displayLoadingBar(done, total);
+                }
+            } else {
+                output.innerHTML = `<p class="error">No previous streams found.</p>`;
+            }
+
+            // Always display the timetable
+            displayWeekTimetable();
+        }
+
+        function displayWeekTimetable() {
+            const calendar = document.createElement('div');
+            calendar.className = 'calendar';
+
+            const previousWeekStreams = getWeekStreams(-1);
+            const currentWeekStreams = getWeekStreams(0);
+            const nextWeekStreams = getWeekStreams(1);
+            const now = new Date();
+
+            // Render previous week
+            weekdays.forEach(day => {
+                const streams = previousWeekStreams[day];
+                const className = streams.length > 0 ? 'has-streams past-day' : 'no-streams past-day';
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `day ${className}`;
+                dayDiv.innerHTML = `<div class="day-name">${day} (Prev)</div>${streams.length > 0 ? streams.join('<br>') : 'No streams'}`;
+                calendar.appendChild(dayDiv);
+            });
+
+            // Render current week
+            weekdays.forEach(day => {
+                const streams = currentWeekStreams[day];
+                const className = streams.length > 0 ? 'has-streams current-day' : 'no-streams';
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `day ${className}`;
+                dayDiv.innerHTML = `<div class="day-name">${day} (Current)</div>${streams.length > 0 ? streams.join('<br>') : 'No streams'}`;
+                calendar.appendChild(dayDiv);
+            });
+
+            // Render next week
+            weekdays.forEach(day => {
+                const streams = nextWeekStreams[day];
+                const className = streams.length > 0 ? 'has-streams' : 'no-streams';
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `day ${className}`;
+                dayDiv.innerHTML = `<div class="day-name">${day} (Next)</div>${streams.length > 0 ? streams.join('<br>') : 'No streams'}`;
+                calendar.appendChild(dayDiv);
+            });
+
+            document.body.appendChild(calendar);
+        }
+
+        function getWeekStreams(offset) {
+            const weekStreams = {};
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() + (offset * 7) - (now.getDay() + 6) % 7);
+
+            weekdays.forEach(day => {
+                const dayStreams = streamDays[day].map(time => `${time}`);
+                weekStreams[day] = dayStreams;
+            });
+
+            return weekStreams;
+        }
+
+        main();
+    </script>
 </body>
-
 </html>
