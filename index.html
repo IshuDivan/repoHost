@@ -4,24 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Schedule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #4a90e2, #50b3a2);
             color: #333;
             padding: 20px;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
         h1 {
-            color: #007bff;
+            color: #ffffff;
             margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         #output {
             margin-bottom: 20px;
             text-align: center;
+            color: #ffffff;
+            font-family: 'Space Mono', monospace;
         }
         .loading-bar {
             background-color: #ccc;
@@ -37,22 +42,24 @@
             transition: width 0.3s;
         }
         .error {
-            color: red;
+            color: #ff4d4d;
         }
         .success {
-            color: green;
+            color: #28a745;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
         }
         th, td {
             padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
-            background-color: #fff;
         }
         th {
             background-color: #007bff;
@@ -65,6 +72,14 @@
         .stream-time {
             color: #28a745;
         }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            td {
+                font-size: 0.9em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -75,10 +90,10 @@
 <script>
     const streamDays = {
         "Monday": [],
-        "Tuesday": [],
-        "Wednesday": [],
+        "Tuesday": ["20:00"],
+        "Wednesday": ["20:00"],
         "Thursday": [],
-        "Friday": [],
+        "Friday": ["20:00"],
         "Saturday": ["20:00"],
         "Sunday": []
     };
