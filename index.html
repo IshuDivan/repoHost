@@ -6,7 +6,7 @@
     <title>Stream Tracker</title>
     <script>
         function fetchStreamInfo() {
-            fetch('calculate_stream.php')
+            fetch('tracker.php')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('stream-output').innerHTML = data;
