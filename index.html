@@ -8,8 +8,8 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #4a90e2, #50b3a2);
-            color: #ffffff;
+            background: linear-gradient(to right, #3e3e3e, #2c2c2c);
+            color: #f9e74e; /* Brighter text color */
             padding: 20px;
             margin: 0;
             display: flex;
@@ -18,7 +18,7 @@
             min-height: 100vh;
         }
         h1 {
-            color: #ffffff;
+            color: #f9e74e; /* Brighter text color */
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             font-size: 2.5em;
@@ -89,162 +89,138 @@
     </style>
 </head>
 <body>
-
-<h1>Stream Schedule</h1>
-<div id="output"></div>
-<div class="loading-bar">
-    <div class="filled"></div>
-</div>
-
-<script>
-    const streamDays = {
-        "Monday": [],
-        "Tuesday": ["20:00"],
-        "Wednesday": ["20:00"],
-        "Thursday": [],
-        "Friday": ["20:00"],
-        "Saturday": ["20:00"],
-        "Sunday": []
-    };
-    const lastStreamLength = 4.5;
-
-    function getLastStream(day, streamTime) {
-        const now = new Date();
-        const daysBehind = (now.getDay() - day + 7) % 7;
-        const lastStreamThisWeek = new Date(now);
-        lastStreamThisWeek.setDate(now.getDate() - daysBehind);
-        const [hour, minute] = streamTime.split(':').map(Number);
-        lastStreamThisWeek.setHours(hour, minute, 0, 0);
-
-        const lastStreamPreviousWeek = new Date(lastStreamThisWeek);
-        lastStreamPreviousWeek.setDate(lastStreamPreviousWeek.getDate() - 7);
-
-        return [lastStreamThisWeek, lastStreamPreviousWeek];
-    }
-
-    function getNextStream(day, streamTime) {
-        const now = new Date();
-        const daysAhead = (day - now.getDay() + 7) % 7;
-        const nextStream = new Date(now);
-        nextStream.setDate(now.getDate() + daysAhead);
-        const [hour, minute] = streamTime.split(':').map(Number);
-        nextStream.setHours(hour, minute, 0, 0);
-        return nextStream;
-    }
-
-    function calculateTimePassed(lastTime) {
-        const now = new Date();
-        return (now - lastTime) / (1000 * 60 * 60);
-    }
-
-    function calculateTimeUntil(nextTime) {
-        const now = new Date();
-        return (nextTime - now) / (1000 * 60 * 60);
-    }
-
-    function displayLoadingBar(done, total) {
-        const bar = document.querySelector('.filled');
-        if (bar) {
-            const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
-            bar.style.width = percentage + '%';
-        }
-    }
-
-    function getWeekdayNumber(weekdayName) {
-        const weekdays = {
-            "Sunday": 0,
-            "Monday": 1,
-            "Tuesday": 2,
-            "Wednesday": 3,
-            "Thursday": 4,
-            "Friday": 5,
-            "Saturday": 6
+    <h1>Stream Schedule</h1>
+    <div id="output"></div>
+    <div class="loading-bar">
+        <div class="filled"></div>
+    </div>
+    <script>
+        const streamDays = {
+            "Monday": [],
+            "Tuesday": ["20:00"],
+            "Wednesday": ["20:00"],
+            "Thursday": [],
+            "Friday": ["20:00"],
+            "Saturday": ["20:00"],
+            "Sunday": []
         };
-        return weekdays[weekdayName];
-    }
-
-    function main() {
-        const output = document.getElementById('output');
-        let lastStreams = [];
-        let nextStream = null;
-
-        for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
-            for (const streamTime of streamTimeList) {
-                const dayNumber = getWeekdayNumber(dayName);
-                const [lastThisWeek, lastPreviousWeek] = getLastStream(dayNumber, streamTime);
-
-                if (lastThisWeek < new Date()) {
-                    lastStreams.push(lastThisWeek);
-                }
-                if (lastPreviousWeek < new Date()) {
-                    lastStreams.push(lastPreviousWeek);
-                }
+        const lastStreamLength = 4.5;
+        function getLastStream(day, streamTime) {
+            const now = new Date();
+            const daysBehind = (now.getDay() - day + 7) % 7;
+            const lastStreamThisWeek = new Date(now);
+            lastStreamThisWeek.setDate(now.getDate() - daysBehind);
+            const [hour, minute] = streamTime.split(':').map(Number);
+            lastStreamThisWeek.setHours(hour, minute, 0, 0);
+            const lastStreamPreviousWeek = new Date(lastStreamThisWeek);
+            lastStreamPreviousWeek.setDate(lastStreamPreviousWeek.getDate() - 7);
+            return [lastStreamThisWeek, lastStreamPreviousWeek];
+        }
+        function getNextStream(day, streamTime) {
+            const now = new Date();
+            const daysAhead = (day - now.getDay() + 7) % 7;
+            const nextStream = new Date(now);
+            nextStream.setDate(now.getDate() + daysAhead);
+            const [hour, minute] = streamTime.split(':').map(Number);
+            nextStream.setHours(hour, minute, 0, 0);
+            return nextStream;
+        }
+        function calculateTimePassed(lastTime) {
+            const now = new Date();
+            return (now - lastTime) / (1000 * 60 * 60);
+        }
+        function calculateTimeUntil(nextTime) {
+            const now = new Date();
+            return (nextTime - now) / (1000 * 60 * 60);
+        }
+        function displayLoadingBar(done, total) {
+            const bar = document.querySelector('.filled');
+            if (bar) {
+                const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
+                bar.style.width = percentage + '%';
             }
         }
-
-        const lastStream = lastStreams.length ? new Date(Math.max(...lastStreams)) : null;
-
-        for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
-            for (const streamTime of streamTimeList) {
-                const dayNumber = getWeekdayNumber(dayName);
-                const nextStreamTemp = getNextStream(dayNumber, streamTime);
-                if (nextStreamTemp > new Date()) {
-                    if (!nextStream || nextStreamTemp < nextStream) {
-                        nextStream = nextStreamTemp;
+        function getWeekdayNumber(weekdayName) {
+            const weekdays = {
+                "Sunday": 0,
+                "Monday": 1,
+                "Tuesday": 2,
+                "Wednesday": 3,
+                "Thursday": 4,
+                "Friday": 5,
+                "Saturday": 6
+            };
+            return weekdays[weekdayName];
+        }
+        function main() {
+            const output = document.getElementById('output');
+            let lastStreams = [];
+            let nextStream = null;
+            for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
+                for (const streamTime of streamTimeList) {
+                    const dayNumber = getWeekdayNumber(dayName);
+                    const [lastThisWeek, lastPreviousWeek] = getLastStream(dayNumber, streamTime);
+                    if (lastThisWeek < new Date()) {
+                        lastStreams.push(lastThisWeek);
+                    }
+                    if (lastPreviousWeek < new Date()) {
+                        lastStreams.push(lastPreviousWeek);
                     }
                 }
             }
-        }
-
-        if (lastStream) {
-            const now = new Date();
-            if (lastStream <= now && now <= new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000)) {
-                const timeSinceLastStream = calculateTimePassed(lastStream);
-                output.innerHTML = `<p class="success">(Probably) Currently streaming! Time since started: ${timeSinceLastStream.toFixed(2)} hours</p>`;
-            } else {
-                const lastStreamWaiting = new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000);
-                const done = calculateTimePassed(lastStreamWaiting);
-                const toBeDone = calculateTimeUntil(nextStream);
-
-                const total = done + toBeDone;
-
-                output.innerHTML = `
-                    <p>Time passed since last Stream: ${done.toFixed(2)} hours</p>
-                    <p>Time until next Stream: ${toBeDone.toFixed(2)} hours</p>
-                    <p>Total wait time: ${total.toFixed(2)} hours</p>
-                    <p>Next Stream is on ${nextStream.toLocaleString('en-US', { weekday: 'long' })} at ${nextStream.getHours()}:${nextStream.getMinutes().toString().padStart(2, '0')}</p>
-                `;
-
-                displayLoadingBar(done, total);
+            const lastStream = lastStreams.length ? new Date(Math.max(...lastStreams)) : null;
+            for (const [dayName, streamTimeList] of Object.entries(streamDays)) {
+                for (const streamTime of streamTimeList) {
+                    const dayNumber = getWeekdayNumber(dayName);
+                    const nextStreamTemp = getNextStream(dayNumber, streamTime);
+                    if (nextStreamTemp > new Date()) {
+                        if (!nextStream || nextStreamTemp < nextStream) {
+                            nextStream = nextStreamTemp;
+                        }
+                    }
+                }
             }
-        } else {
-            output.innerHTML = `<p class="error">No previous streams found.</p>`;
+            if (lastStream) {
+                const now = new Date();
+                if (lastStream <= now && now <= new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000)) {
+                    const timeSinceLastStream = calculateTimePassed(lastStream);
+                    output.innerHTML = `<p class="success">(Probably) Currently streaming! Time since started: ${timeSinceLastStream.toFixed(2)} hours</p>`;
+                } else {
+                    const lastStreamWaiting = new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000);
+                    const done = calculateTimePassed(lastStreamWaiting);
+                    const toBeDone = calculateTimeUntil(nextStream);
+                    const total = done + toBeDone;
+                    output.innerHTML = `
+                        <p>Time passed since last Stream: ${done.toFixed(2)} hours</p>
+                        <p>Time until next Stream: ${toBeDone.toFixed(2)} hours</p>
+                        <p>Total wait time: ${total.toFixed(2)} hours</p>
+                        <p>Next Stream is on ${nextStream.toLocaleString('en-US', { weekday: 'long' })} at ${nextStream.getHours()}:${nextStream.getMinutes().toString().padStart(2, '0')}</p>
+                    `;
+                    displayLoadingBar(done, total);
+                }
+            } else {
+                output.innerHTML = `<p class="error">No previous streams found.</p>`;
+            }
+            displayWeekTimetable();
         }
-
-        // Always display the timetable
-        displayWeekTimetable();
-    }
-
-    function displayWeekTimetable() {
-        const timetableHTML = `
-            <table>
-                <tr>
-                    <th>Day</th>
-                    <th>Stream Times</th>
-                </tr>
-                ${Object.entries(streamDays).map(([day, times]) => `
+        function displayWeekTimetable() {
+            const timetableHTML = `
+                <table>
                     <tr>
-                        <td>${day}</td>
-                        <td>${times.length > 0 ? times.map(time => `<span class="stream-time">${time}</span>`).join(', ') : 'No streams'}</td>
+                        <th>Day</th>
+                        <th>Stream Times</th>
                     </tr>
-                `).join('')}
-            </table>
-        `;
-        document.body.insertAdjacentHTML('beforeend', timetableHTML);
-    }
-
-    main();
-</script>
-
+                    ${Object.entries(streamDays).map(([day, times]) => `
+                        <tr>
+                            <td>${day}</td>
+                            <td>${times.length > 0 ? times.map(time => `<span class="stream-time">${time}</span>`).join(', ') : 'No streams'}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+            document.body.insertAdjacentHTML('beforeend', timetableHTML);
+        }
+        main();
+    </script>
 </body>
 </html>
