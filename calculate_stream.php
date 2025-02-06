@@ -119,5 +119,9 @@ function main() {
     return $output;
 }
 
-echo main();
+// Get output
+$output = main();
+
+// Write output to HTML file
+file_put_contents('output.html', $output);
 ?>
