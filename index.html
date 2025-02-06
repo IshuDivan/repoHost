@@ -3,31 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Tracker</title>
-    <script>
-        function fetchStreamInfo() {
-            fetch('calculate_stream.php')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    document.getElementById('stream-output').innerHTML = data;
-                })
-                .catch(error => {
-                    console.error('Error fetching stream info:', error);
-                    document.getElementById('stream-output').innerHTML = "Error fetching stream information.";
-                });
+    <title>Stream Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-
-        // Fetch stream info when the page loads
-        window.onload = fetchStreamInfo;
-    </script>
+        .output {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ccc;
+        }
+        .loading-bar {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .filled {
+            height: 20px;
+            background: #007bff;
+            transition: width 0.5s;
+        }
+    </style>
 </head>
 <body>
-    <h1>Stream Tracker Output</h1>
-    <div id="stream-output">Loading...</div>
+
+<h1>Stream Schedule</h1>
+<button onclick="calculateStreamTimes()">Check Stream Times</button>
+
+<div class="output" id="output"></div>
+
+<script>
+    function getLastStream(day, streamTime) {
+        const now = new Date();
+        const daysBehind = (now.getDay() - day + 7) % 7;
+        const lastStreamThisWeek = new Date(now);
+        lastStreamThisWeek.setDate(now.getDate() - daysBehind);
+        lastStreamThisWeek.setHours(...streamTime.split(':'));
+
+        const lastStreamPreviousWeek = new Date(lastStreamThisWeek);
+        lastStreamPreviousWeek.setDate(lastStreamThisWeek.getDate() - 7);
+
+        return [lastStreamThisWeek, lastStreamPreviousWeek];
+    }
+
+    function getNextStream(day, streamTime) {
+        const now = new Date();
+        const daysAhead = (day - now.getDay() + 7) % 7;
+        const nextStream = new Date(now);
+        nextStream.setDate(now.getDate() + daysAhead);
+        nextStream.setHours(...streamTime.split(':'));
+        return nextStream;
+    }
+
+    function calculateTimePassed(lastTime) {
+        const now = new Date();
+        return (now - lastTime) / (1000 * 60 * 60); // Convert to hours
+    }
+
+    function calculateTimeUntil(nextTime) {
+        const now = new Date();
+        return (nextTime - now) / (1000 * 60 * 60); // Convert to hours
+    }
+
+    function getWeekdayName(day) {
+        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        return weekdays[day];
+    }
+
+    function calculateStreamTimes() {
+        const streamDays = {
+            "Tuesday": "20:00",
+            "Wednesday": "20:00",
+            "Thursday": "20:00",
+            "Friday": "20:00",
+            "Saturday": "20:00"
+        };
+        const lastStreamLength = 4.5; // Duration of an average stream in hours
+
+        const lastStreams = [];
+        for (const [dayName, streamTime] of Object.entries(streamDays)) {
+            const dayNumber = new Date(Date.parse(dayName + " 1 Jan 2022")).getDay(); // Get weekday number
+            const [lastThisWeek, lastPreviousWeek] = getLastStream(dayNumber, streamTime);
+
+            if (lastThisWeek < new Date()) {
+                lastStreams.push(lastThisWeek);
+            }
+            if (lastPreviousWeek < new Date()) {
+                lastStreams.push(lastPreviousWeek);
+            }
+        }
+
+        const lastStream = lastStreams.length > 0 ? new Date(Math.max(...lastStreams)) : null;
+        let nextStream = null;
+
+        for (const [dayName, streamTime] of Object.entries(streamDays)) {
+            const dayNumber = new Date(Date.parse(dayName + " 1 Jan 2022")).getDay(); // Get weekday number
+            const nextStreamTemp = getNextStream(dayNumber, streamTime);
+            if (nextStreamTemp > new Date()) {
+                if (nextStream === null || nextStreamTemp < nextStream) {
+                    nextStream = nextStreamTemp;
+                }
+            }
+        }
+
+        const outputDiv = document.getElementById('output');
+        let output = "";
+
+        if (lastStream) {
+            const now = new Date();
+            if (lastStream <= now && now <= new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000)) {
+                // We are in the middle of a stream
+                const timeSinceLastStream = calculateTimePassed(lastStream);
+                output += `(Probably) Currently streaming! Time since started: ${timeSinceLastStream.toFixed(2)} hours<br>`;
+            } else {
+                const lastStreamWaiting = new Date(lastStream.getTime() + lastStreamLength * 60 * 60 * 1000);
+                const done = calculateTimePassed(lastStreamWaiting);
+                const toBeDone = calculateTimeUntil(nextStream);
+
+                const total = done + toBeDone;
+
+                output += `Time passed since last Stream: ${done.toFixed(2)} hours<br>`;
+                output += `Time until next Stream: ${toBeDone.toFixed(2)} hours<br>`;
+                output += `Total wait time: ${total.toFixed(2)} hours<br>`;
+                output += `Next Stream is on ${getWeekdayName(nextStream.getDay())}<br>`;
+                output += displayLoadingBar(done, total);
+            }
+        } else {
+            output += "No previous streams found.";
+        }
+
+        outputDiv.innerHTML = output;
+    }
+
+    function displayLoadingBar(done, total) {
+        const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
+        const filledLength = Math.floor(40 * percentage / 100);
+        const bar = '█'.repeat(filledLength) + '░'.repeat(40 - filledLength);
+        return `<div class="loading-bar"><div class="filled" style="width: ${percentage}%;"></div></div>`;
+    }
+</script>
+
 </body>
 </html>
