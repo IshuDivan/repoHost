@@ -6,13 +6,19 @@
     <title>Stream Tracker</title>
     <script>
         function fetchStreamInfo() {
-            fetch('tracker.php')
-                .then(response => response.text())
+            fetch('calculate_stream.php')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(data => {
                     document.getElementById('stream-output').innerHTML = data;
                 })
                 .catch(error => {
                     console.error('Error fetching stream info:', error);
+                    document.getElementById('stream-output').innerHTML = "Error fetching stream information.";
                 });
         }
 
