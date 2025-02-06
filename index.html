@@ -9,7 +9,7 @@
         body {
             font-family: 'Roboto', sans-serif;
             background: linear-gradient(to right, #4a90e2, #50b3a2);
-            color: #333;
+            color: #ffffff; /* Set default text color to white */
             padding: 20px;
             margin: 0;
             display: flex;
@@ -25,7 +25,6 @@
         #output {
             margin-bottom: 20px;
             text-align: center;
-            color: #ffffff;
             font-family: 'Space Mono', monospace;
         }
         .loading-bar {
@@ -68,6 +67,7 @@
         }
         td {
             font-size: 1.1em;
+            color: #333; /* Dark text for better contrast */
         }
         .stream-time {
             color: #28a745;
@@ -210,6 +210,7 @@
             output.innerHTML = `<p class="error">No previous streams found.</p>`;
         }
 
+        // Always display the timetable
         displayWeekTimetable();
     }
 
