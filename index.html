@@ -3,163 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Schedule</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
+    <title>Umineko Waiting Room</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #2c3e50, #34495e);
-            color: #ecf0f1;
-            padding: 20px;
-            margin: 0;
+            font-family: 'Arial', sans-serif; /* You can choose any font you like */
+            margin: 20px;
+            background-color: #2c3e50; /* Dark blue-gray background */
+            color: white; /* Change text color to white for better contrast */
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            align-items: center; /* Center align all elements */
         }
-        h1 {
-            color: #ecf0f1;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            font-size: 2.5em;
+
+        .header {
+            color: gold; /* Gold color for the title */
+            font-size: 3em; /* Large font size */
+            margin-bottom: 20px; /* Space below the title */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Shadow for the title */
         }
-        #output {
-            margin-bottom: 20px;
-            text-align: center;
-            font-family: 'Space Mono', monospace;
-            font-size: 1.2em;
-        }
-        .loading-bar {
-            background-color: #ccc;
-            border-radius: 5px;
-            overflow: hidden;
-            height: 20px;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .filled {
-            background-color: #007bff;
-            height: 100%;
-            transition: width 0.3s;
-        }
-        .error {
-            color: #ff4d4d;
-            font-size: 1.2em;
-        }
-        .success {
-            color: #28a745;
-            font-size: 1.2em;
-        }
+
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-            width: 100%;
+            gap: 20px; /* Increased gap between boxes */
         }
+
         .day {
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px; /* Rounded corners */
+            padding: 15px; /* Increased padding for better spacing */
             text-align: center;
-            font-size: 1.2em;
-            background-color: #ffffff;
-            color: #000000;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            background-color: white; /* Keep day body white */
+            color: black; /* Change text color to black for contrast */
+            position: relative;
+            height: 150px; /* Increased height */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Shadow effect */
+            transition: transform 0.2s; /* Smooth transition for hover effect */
         }
-        .day-name {
+
+        .day:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+
+        .day-header {
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             padding: 10px;
             border-radius: 5px;
-            color: #ffffff;
-            height: 50px;
-            line-height: 50px;
-            font-size: 1.5em;
+            font-size: 1.5em; /* Larger font size for weekday */
+            background-color: #FF5722; /* Distinct background color for header */
+            color: white; /* White text for header */
         }
+
+        .day-header .date {
+            font-size: 0.75em; /* Smaller font size for date */
+            display: block;
+        }
+
         .category {
-            font-style: italic;
-            color: #555;
-            white-space: normal;
+            font-weight: bold; /* Make category names bold */
+            font-size: 1.2em; /* Increase font size */
+            margin-top: 10px; /* Add some space above */
+            color: #333; /* Darker color for better readability */
         }
-        .date {
-            font-size: 0.9em;
-            margin-top: 5px;
-            color: #cccccc;
-        }
+
         .past-day {
-            background-color: #e0e0e0; /* Darker color for past days */
-            color: #999; /* Lighter text color for readability */
+            background-color: #d0d0d0; /* Lighter gray for past days */
+            color: #555; /* Darker text color for better contrast */
         }
-        .log {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 600px;
-            text-align: left;
+
+        .countdown, .last-event {
+            font-size: 1.5em;
+            text-align: center;
+            margin: 20px 0;
+            color: #FF5722; /* Deep Orange */
         }
-        .update-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
+
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column; /* Stack elements vertically */
         }
-        .update-button:hover {
-            background-color: #0056b3;
+
+        .loading-wheel {
+            width: 140vw; /* Updated to be twice as wide */
+            height: 140vw; /* Updated to be twice as high */
+            max-width: 600px; /* Maximum width */
+            max-height: 600px; /* Maximum height */
+            margin-bottom: 10px; /* Space between wheel and percentage */
         }
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2em;
-            }
-            td {
-                font-size: 1em;
-            }
+
+        .loading-wheel svg {
+            width: 100%; /* Make SVG responsive */
+            height: 100%; /* Make SVG responsive */
+        }
+
+        .loading-wheel text {
+            fill: #FF5722; /* Color for countdown text */
+            font-size: 3em; /* Adjust text size */
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .percentage {
+            text-align: center;
+            font-size: 2em; /* Percentage font size */
+            color: #FF5722; /* Match color with wheel */
+            margin-bottom: 10px; /* Space between percentage and last event text */
+        }
+
+        .last-event {
+            margin-top: 0; /* Remove top margin */
+            text-align: center; /* Center the last event text */
         }
     </style>
 </head>
 <body>
-    <h1>Stream Schedule</h1>
-    <div id="output"></div>
-    <div class="loading-bar">
-        <div class="filled"></div>
+    <div class="header">Umineko Waiting Room</div>
+    <div class="loading-container">
+        <div class="loading-wheel" id="loading-wheel">
+            <svg>
+                <circle cx="50%" cy="50%" r="35%" stroke="#ddd" stroke-width="20" fill="none" /> <!-- Fatter rim -->
+                <circle id="progress-circle" cx="50%" cy="50%" r="35%" 
+                        stroke="#FF5722" stroke-width="20" fill="none" 
+                        stroke-dasharray="219.91" stroke-dashoffset="219.91" stroke-linecap="round" />
+                <text id="countdown-text" x="50%" y="50%">00:00:00:00</text>
+            </svg>
+        </div>
+        <div class="percentage" id="percentage">0.000%</div>
+        <div class="last-event" id="last-event"></div> <!-- Moved inside loading-container -->
     </div>
-
-    <div id="calendar" class="calendar"></div>
-    <button class="update-button" onclick="updateLog()">Update</button>
-    <div id="log" class="log"></div>
+    <div class="calendar" id="timetable"></div>
 
     <script>
-        const initializeWeek = () => {
-            return {
-                "Monday": { times: [], category: "Thinking about Umineko" },
-                "Tuesday": { times: ["20:00"], category: "Thinking about Umineko" },
-                "Wednesday": { times: ["20:00"], category: "Thinking about Umineko" },
-                "Thursday": { times: ["20:00"], category: "Thinking about Umineko" },
-                "Friday": { times: ["20:00"], category: "Thinking about Umineko" },
-                "Saturday": { times: ["20:00"], category: "Thinking about Umineko" },
-                "Sunday": { times: [], category: "Thinking about Umineko" },
-            };
-        };
+        const streamFileUrl = 'https://gist.githubusercontent.com/IshuDivan/27a37e4dc3baa85d5aa1952a215e8567/raw/afd1a5706caf4aea08628b4170feacc03234c51a/schedule.txt';
 
-        const schedules = {
-            current: initializeWeek(),
-            previous: initializeWeek(),
-            next: initializeWeek(),
-        };
-
-        const categoryColors = {
-            "No streams": "#ff7f50",
-        };
-
-        const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
+        // Function to generate a random color
         function getRandomColor() {
             const letters = '0123456789ABCDEF';
             let color = '#';
@@ -169,204 +148,189 @@
             return color;
         }
 
-        function main() {
-            const output = document.getElementById('output');
+        async function fetchStreamSchedule() {
+            const response = await fetch(streamFileUrl);
+            const text = await response.text();
+            return text.split('\n').reduce((acc, line) => {
+                const [date, category] = line.split(', ').map(item => item.trim());
+                if (date && category) {
+                    acc[date] = category;
+                }
+                return acc;
+            }, {});
+        }
 
-            // Load categories from file before displaying timetable
-            loadCategoriesFromFile().then(() => {
-                // Set colors after loading categories
-                Object.keys(schedules.current).forEach(day => {
-                    const category = schedules.current[day].category;
-                    if (!categoryColors[category]) {
-                        categoryColors[category] = getRandomColor();
-                    }
-                });
+        function createCalendarDates(startDate, numDays) {
+            const dates = [];
+            for (let i = 0; i < numDays; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dd = String(date.getDate()).padStart(2, '0');
+                const mm = String(date.getMonth() + 1).padStart(2, '0'); // January is 0!
+                const yyyy = date.getFullYear();
+                const weekday = date.toLocaleString('en-US', { weekday: 'long' });
+                dates.push({ date: `${dd}.${mm}.${yyyy}`, weekday }); // Format: DD.MM.YYYY
+            }
+            return dates;
+        }
 
-                // Display timetable after loading categories and setting colors
-                displayWeekTimetable();
-                calculateAndDisplayStreamInfo(); // Calculate time info
-            }).catch(error => {
-                console.error('Error loading categories:', error);
+        function renderTimetable(schedule) {
+            const timetable = document.getElementById('timetable');
+            const today = new Date();
+            const categoryColors = {}; // Store colors for categories
+
+            // Set startDate to the Monday of the previous week
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - today.getDay() - 6); // Move to the previous week's Monday
+
+            const totalDays = 21; // Show 21 days
+
+            const weekDates = createCalendarDates(startDate, totalDays);
+            
+            weekDates.forEach(({ date, weekday }) => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.setAttribute('data-day', weekday);
+                const category = schedule[date] || 'No streams';
+
+                // Assign a random color to the category if it doesn't have one
+                if (!categoryColors[category]) {
+                    categoryColors[category] = getRandomColor();
+                }
+
+                // Check if the date is in the past
+                const eventDate = new Date(date.split('.').reverse().join('-')); // Convert DD.MM.YYYY to YYYY-MM-DD
+                const isToday = eventDate.toDateString() === today.toDateString(); // Check if it's today
+
+                if (!isToday && eventDate < today) {
+                    dayDiv.classList.add('past-day'); // Apply past day styling
+                }
+
+                dayDiv.innerHTML = `
+                    <div class="day-header" style="background-color: ${categoryColors[category]}">${weekday} <span class="date">${date}</span></div>
+                    <div class="category">${category}</div>
+                `;
+                timetable.appendChild(dayDiv);
             });
+
+            return weekDates;
         }
 
-        function loadCategoriesFromFile() {
-            return fetch('https://gist.githubusercontent.com/IshuDivan/27a37e4dc3baa85d5aa1952a215e8567/raw/schedule.txt')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    const lines = data.split('\n');
-                    const dayCategories = {};
-
-                    lines.forEach(line => {
-                        const [day, date, category] = line.split(',').map(item => item.trim());
-                        if (category) {
-                            dayCategories[day] = category; 
-                        }
-                    });
-
-                    // Update the current schedule with new categories
-                    Object.keys(dayCategories).forEach(day => {
-                        if (schedules.current[day]) {
-                            schedules.current[day].category = dayCategories[day];
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading schedule:', error);
-                });
-        }
-
-        function displayWeekTimetable() {
-            const calendar = document.getElementById('calendar');
-            calendar.innerHTML = '';
-
-            const currentDate = new Date();
-            const startOfWeek = new Date(currentDate);
-            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1);
-
-            for (let offset = -1; offset <= 1; offset++) {
-                const weekLabel = ['(Prev)', '(Current)', '(Next)'][offset + 1];
-
-                weekdays.forEach((day, index) => {
-                    const dayDiv = document.createElement('div');
-                    const weekKey = offset === 0 ? 'current' : (offset < 0 ? 'previous' : 'next');
-                    const daySchedule = schedules[weekKey][day] || { category: "No streams" };
-                    const category = daySchedule.category;
-                    const dayDate = new Date(startOfWeek);
-                    dayDate.setDate(startOfWeek.getDate() + index + (offset * 7));
-
-                    // Check if the day is in the past
-                    const isPast = dayDate < currentDate;
-
-                    dayDiv.className = `day ${isPast ? 'past-day' : ''}`; // Apply past-day class if it's in the past
-                    dayDiv.innerHTML = `
-                        <div class="day-name" style="background-color: ${categoryColors[category]}">${day} ${weekLabel}</div>
-                        <div class="date">${dayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
-                        <div class="category">${category}</div>
-                        <button onclick="randomizeColor('${day}', '${weekKey}')">Randomize Color</button>
-                    `;
-                    calendar.appendChild(dayDiv);
-                });
-            }
-        }
-
-        function calculateAndDisplayStreamInfo() {
-            const output = document.getElementById('output');
+        function startCountdown(schedule) {
             const now = new Date();
-            let lastStreams = [];
-            let nextStream = null;
+            let targetDate = null;
+            let lastEventDate = null;
 
-            for (const [dayName, { times }] of Object.entries(schedules.current)) {
-                for (const streamTime of times) {
-                    const dayNumber = getWeekdayNumber(dayName);
-                    const [lastThisWeek, lastPreviousWeek] = getLastStream(dayNumber, streamTime);
-                    if (lastThisWeek < now) lastStreams.push(lastThisWeek);
-                    if (lastPreviousWeek < now) lastStreams.push(lastPreviousWeek);
+            // Find the closest future date with "Umineko" in the schedule
+            for (const [date, category] of Object.entries(schedule)) {
+                const eventDate = new Date(date.split('.').reverse().join('-')); // Convert DD.MM.YYYY to YYYY-MM-DD
+                eventDate.setHours(20, 0, 0, 0); // Set time to 20:00
+
+                if (eventDate > now && category.includes("Umineko")) {
+                    targetDate = eventDate;
+                    break;
+                }
+
+                if (eventDate < now && category.includes("Umineko")) {
+                    lastEventDate = eventDate;
                 }
             }
 
-            const lastStream = lastStreams.length ? new Date(Math.max(...lastStreams)) : null;
+            if (!targetDate) {
+                document.getElementById('countdown-text').textContent = "N/A";
+                document.getElementById('percentage').textContent = "0.000%";
+                return;
+            }
 
-            for (const [dayName, { times }] of Object.entries(schedules.current)) {
-                for (const streamTime of times) {
-                    const dayNumber = getWeekdayNumber(dayName);
-                    const nextStreamTemp = getNextStream(dayNumber, streamTime);
-                    if (nextStreamTemp > now) {
-                        if (!nextStream || nextStreamTemp < nextStream) {
-                            nextStream = nextStreamTemp;
-                        }
-                    }
+            const countdownElement = document.getElementById('countdown-text');
+            const loadingCircle = document.getElementById('progress-circle');
+            const percentageElement = document.getElementById('percentage');
+            const radius = 35; // Circle radius in percentage
+            const circumference = 2 * Math.PI * radius; // Calculate circumference
+
+            // Set stroke-dasharray and stroke-dashoffset to the circumference
+            loadingCircle.setAttribute('stroke-dasharray', circumference);
+            loadingCircle.setAttribute('stroke-dashoffset', circumference); // Start fully uncovered
+
+            const totalDuration = targetDate - lastEventDate;
+
+            const updateCountdown = () => {
+                const remainingTime = targetDate - new Date();
+
+                if (remainingTime < 0) {
+                    countdownElement.textContent = "00:00:00:00";
+                    clearInterval(interval);
+                    return;
                 }
-            }
 
-            if (lastStream) {
-                if (lastStream <= now && now <= new Date(lastStream.getTime() + 1.5 * 60 * 60 * 1000)) {
-                    const timeSinceLastStream = calculateTimePassed(lastStream);
-                    output.innerHTML = `<p class="success">(Probably) Currently streaming! Time since started: ${timeSinceLastStream.toFixed(2)} hours</p>`;
-                } else {
-                    const lastStreamWaiting = new Date(lastStream.getTime() + 1.5 * 60 * 60 * 1000);
-                    const done = calculateTimePassed(lastStreamWaiting);
-                    const toBeDone = calculateTimeUntil(nextStream);
-                    const total = done + toBeDone;
+                const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
 
-                    output.innerHTML = `
-                        <p>Time passed since last Stream: ${done.toFixed(2)} hours</p>
-                        <p>Time until next Stream: ${toBeDone.toFixed(2)} hours</p>
-                        <p>Total wait time: ${total.toFixed(2)} hours</p>
-                        <p>Next Stream is on ${nextStream.toLocaleString('en-US', { weekday: 'long' })} at ${nextStream.getHours()}:${nextStream.getMinutes().toString().padStart(2, '0')}</p>
-                    `;
-                    displayLoadingBar(done, total);
-                }
-            } else {
-                output.innerHTML = `<p class="error">No previous streams found.</p>`;
-            }
-        }
+                countdownElement.textContent = `${days}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        function calculateTimePassed(lastTime) {
-            const now = new Date();
-            return (now - lastTime) / (1000 * 60 * 60); // Convert milliseconds to hours
-        }
-
-        function calculateTimeUntil(nextTime) {
-            const now = new Date();
-            return (nextTime - now) / (1000 * 60 * 60); // Convert milliseconds to hours
-        }
-
-        function getLastStream(day, streamTime) {
-            const now = new Date();
-            const daysBehind = (now.getDay() + 6 - day) % 7;
-            const lastStreamThisWeek = new Date(now);
-            lastStreamThisWeek.setDate(now.getDate() - daysBehind);
-            const [hour, minute] = streamTime.split(':').map(Number);
-            lastStreamThisWeek.setHours(hour, minute, 0, 0);
-            const lastStreamPreviousWeek = new Date(lastStreamThisWeek);
-            lastStreamPreviousWeek.setDate(lastStreamPreviousWeek.getDate() - 7);
-            return [lastStreamThisWeek, lastStreamPreviousWeek];
-        }
-
-        function getNextStream(day, streamTime) {
-            const now = new Date();
-            const daysAhead = (day - (now.getDay() + 6) % 7 + 7) % 7;
-            const nextStream = new Date(now);
-            nextStream.setDate(now.getDate() + daysAhead);
-            const [hour, minute] = streamTime.split(':').map(Number);
-            nextStream.setHours(hour, minute, 0);
-            return nextStream;
-        }
-
-        function displayLoadingBar(done, total) {
-            const bar = document.querySelector('.filled');
-            if (bar) {
-                const percentage = Math.min(Math.max((done / total) * 100, 0), 100);
-                bar.style.width = percentage + '%';
-            }
-        }
-
-        function getWeekdayNumber(weekdayName) {
-            const weekdays = {
-                "Monday": 1,
-                "Tuesday": 2,
-                "Wednesday": 3,
-                "Thursday": 4,
-                "Friday": 5,
-                "Saturday": 6,
-                "Sunday": 0
+                // Update loading wheel
+                const elapsedTime = new Date() - lastEventDate;
+                const percentage = Math.min((elapsedTime / totalDuration) * 100, 100);
+                const offset = circumference - (percentage / 100) * circumference; // Calculate new offset
+                loadingCircle.style.strokeDashoffset = offset; // Update the offset to fill the circle
+                percentageElement.textContent = `${(percentage).toFixed(3)}%`; // Display percentage to three decimal places
             };
-            return weekdays[weekdayName];
+
+            updateCountdown(); // Initial call
+            const interval = setInterval(updateCountdown, 1000);
         }
 
-        function randomizeColor(day, week) {
-            const category = schedules[week][day].category;
-            categoryColors[category] = getRandomColor(); // Update color
-            displayWeekTimetable(); // Refresh to show updated colors
+        function updateLastEvent(schedule) {
+            const now = new Date();
+            let lastEventDate = null;
+
+            // Find the last date with "Umineko" in the schedule
+            for (const [date, category] of Object.entries(schedule)) {
+                const eventDate = new Date(date.split('.').reverse().join('-')); // Convert DD.MM.YYYY to YYYY-MM-DD
+                eventDate.setHours(20, 0, 0, 0); // Set time to 20:00
+
+                if (eventDate < now && category.includes("Umineko")) {
+                    lastEventDate = eventDate;
+                }
+            }
+
+            const lastEventElement = document.getElementById('last-event');
+
+            if (lastEventDate) {
+                const updateLastEventTime = () => {
+                    const timeSinceLastEvent = new Date() - lastEventDate;
+
+                    const days = Math.floor(timeSinceLastEvent / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeSinceLastEvent % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeSinceLastEvent % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeSinceLastEvent % (1000 * 60)) / 1000);
+
+                    lastEventElement.innerHTML = `Time since last 'Umineko' event: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                };
+
+                updateLastEventTime(); // Initial call
+                const interval = setInterval(updateLastEventTime, 1000);
+            } else {
+                lastEventElement.innerHTML = "No past 'Umineko' events found.";
+            }
         }
 
-        main();
+        async function init() {
+            try {
+                const schedule = await fetchStreamSchedule();
+                const weekDates = renderTimetable(schedule);
+                startCountdown(schedule); // Start the countdown after loading the timetable
+                updateLastEvent(schedule); // Update the last event time
+            } catch (error) {
+                console.error('Error fetching stream schedule:', error);
+                const timetable = document.getElementById('timetable');
+                timetable.innerHTML = '<div class="day">Failed to load schedule</div>';
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>
